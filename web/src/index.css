@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+body::selection {
+  background-color: #d6f2ca;
+  color: #183b2b;
+}
+
+button {
+  cursor: pointer;
+}
