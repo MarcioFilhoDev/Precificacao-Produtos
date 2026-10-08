@@ -7,12 +7,15 @@ import {
   SparkleIcon,
 } from "@phosphor-icons/react";
 
+import { Link } from "react-router-dom";
+
 import Input from "../../../components/Input";
+
 import { useSignUp } from "../../../hooks/useSignUp";
 import { Controller } from "react-hook-form";
 
 export default function SignUp() {
-  const { control, errors, handleSubmit, isSubmitting, registerNewUser } =
+  const { control, errors, handleSubmit, isSubmitting, handleRegisterNewUser } =
     useSignUp();
 
   return (
@@ -128,10 +131,16 @@ export default function SignUp() {
             <form
               onSubmit={handleSubmit(
                 async (data) =>
-                  await registerNewUser(data.email, data.password),
+                  await handleRegisterNewUser(
+                    data.email,
+                    data.password,
+                    data.first_name,
+                    data.second_name,
+                  ),
               )}
               className="space-y-4"
             >
+              {/* Fisrt name */}
               <Controller
                 control={control}
                 name="first_name"
@@ -144,6 +153,7 @@ export default function SignUp() {
                       label="Nome"
                       type="text"
                       placeholder="Primeiro nome"
+                      autoComplete="username"
                     />
 
                     {errors.first_name && (
@@ -155,6 +165,7 @@ export default function SignUp() {
                 )}
               />
 
+              {/* Second name */}
               <Controller
                 control={control}
                 name="second_name"
@@ -178,6 +189,7 @@ export default function SignUp() {
                 )}
               />
 
+              {/* E-mail */}
               <Controller
                 control={control}
                 name="email"
@@ -190,6 +202,7 @@ export default function SignUp() {
                       label="E-mail"
                       type="email"
                       placeholder="sua@empresa.com"
+                      autoComplete="email"
                     />
 
                     {errors.email && (
@@ -201,6 +214,7 @@ export default function SignUp() {
                 )}
               />
 
+              {/* Password */}
               <Controller
                 control={control}
                 name="password"
@@ -213,6 +227,7 @@ export default function SignUp() {
                       label="Senha"
                       type="password"
                       placeholder="Crie uma senha segura"
+                      autoComplete="current-password"
                     />
 
                     {errors.password && (
@@ -241,12 +256,12 @@ export default function SignUp() {
 
             <div className="mt-6 flex items-center justify-center gap-1.5 text-sm text-[#78827b]">
               Já tem uma conta?
-              <a
-                href="/"
+              <Link
+                to={"/"}
                 className="font-semibold text-[#285a3c] hover:text-[#183b2b]"
               >
                 Entrar
-              </a>
+              </Link>
             </div>
           </div>
         </section>

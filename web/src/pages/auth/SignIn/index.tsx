@@ -6,6 +6,7 @@ import {
   TrendUpIcon,
 } from "@phosphor-icons/react";
 import Input from "../../../components/Input";
+import { Link } from "react-router-dom";
 
 export default function SignIn() {
   return (
@@ -126,12 +127,14 @@ export default function SignIn() {
                 label="E-mail"
                 type="email"
                 placeholder="Digite seu e-mail"
+                autoComplete="email"
               />
 
               <Input
                 label="Senha"
                 type="password"
                 placeholder="Digite sua senha"
+                autoComplete="current-password"
               />
 
               <div className="-mt-1 flex items-center justify-between gap-3">
@@ -161,12 +164,12 @@ export default function SignIn() {
 
             <div className="mt-7 flex items-center justify-center gap-1.5 text-sm text-[#78827b]">
               Ainda não tem uma conta?
-              <a
-                href="/signup"
+              <Link
+                to={"/signup"}
                 className="font-semibold text-[#285a3c] hover:text-[#183b2b]"
               >
                 Criar conta
-              </a>
+              </Link>
             </div>
 
             <div className="mt-12 flex items-center justify-center gap-2 text-xs text-[#a0a8a2]">
