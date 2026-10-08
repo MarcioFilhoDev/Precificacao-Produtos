@@ -2,10 +2,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../services/firebaseConnection";
-
-import { toast } from "react-toastify";
+import { useContext } from "react";
+import { AuthContext } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const SignUpSchema = z
   .object({
@@ -38,19 +37,28 @@ const useSignUp = () => {
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(SignUpSchema),
+    defaultValues: {
+      first_name: "teste",
+      second_name: "teste",
+      email: "teste@teste.com",
+      password: "123123",
+    },
   });
 
+  const navigate = useNavigate();
+  const { registerNewUser } = useContext(AuthContext);
+
   //    Rules
-  async function registerNewUser(email: string, password: string) {
-    await createUserWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        toast.success("Usuário registrado com sucesso.");
-        reset();
-      })
-      .catch((error) => {
-        toast.error("Erro ao cadastrar novo usuário!");
-        console.log(error);
-      });
+  async function handleRegisterNewUser(
+    email: string,
+    password: string,
+    first_name: string,
+    second_name: string,
+  ) {
+    await registerNewUser(email, password, first_name, second_name).then(() => {
+      navigate("/dashboard");
+      reset();
+    });
   }
 
   return {
@@ -58,7 +66,7 @@ const useSignUp = () => {
     errors,
     isSubmitting,
     handleSubmit,
-    registerNewUser,
+    handleRegisterNewUser,
   };
 };
 

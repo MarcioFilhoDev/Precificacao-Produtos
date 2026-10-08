@@ -6,9 +6,22 @@ import {
   TrendUpIcon,
 } from "@phosphor-icons/react";
 import Input from "../../../components/Input";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useLogin } from "../../../hooks/useSignIn";
+import { Controller } from "react-hook-form";
+import { useContext } from "react";
+import { AuthContext } from "../../../contexts/AuthContext";
 
 export default function SignIn() {
+  const { control, errors, handleLoginUser, handleSubmit, isSubmitting } =
+    useLogin();
+
+  const { signed } = useContext(AuthContext);
+
+  if (signed) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <main className="min-h-screen bg-[#f6f7f4] p-4 font-sans text-[#17241d] sm:p-6 lg:p-8">
       <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-360 overflow-hidden rounded-[28px] bg-white shadow-[0_24px_80px_-36px_rgba(23,36,29,0.24)] lg:grid-cols-2">
@@ -122,19 +135,61 @@ export default function SignIn() {
               <span className="h-px flex-1 bg-[#e9ece8]" />
             </div>
 
-            <form className="space-y-5">
-              <Input
-                label="E-mail"
-                type="email"
-                placeholder="Digite seu e-mail"
-                autoComplete="email"
+            <form
+              onSubmit={handleSubmit(
+                async (data) =>
+                  await handleLoginUser(data.email, data.password),
+              )}
+              className="space-y-5"
+            >
+              {/* E-mail */}
+              <Controller
+                control={control}
+                name="email"
+                defaultValue=""
+                render={({ field: { value, onChange } }) => (
+                  <div className="flex flex-col gap-2">
+                    <Input
+                      value={value}
+                      onChange={onChange}
+                      label="E-mail"
+                      type="email"
+                      placeholder="Digite seu e-mail"
+                      autoComplete="email"
+                    />
+
+                    {errors.email && (
+                      <span className="ml-1 block text-xs text-red-600">
+                        {errors.email.message}
+                      </span>
+                    )}
+                  </div>
+                )}
               />
 
-              <Input
-                label="Senha"
-                type="password"
-                placeholder="Digite sua senha"
-                autoComplete="current-password"
+              {/* Password */}
+              <Controller
+                control={control}
+                name="password"
+                defaultValue=""
+                render={({ field: { value, onChange } }) => (
+                  <div className="flex flex-col gap-2">
+                    <Input
+                      value={value}
+                      onChange={onChange}
+                      label="Senha"
+                      type="password"
+                      placeholder="Digite sua senha"
+                      autoComplete="current-password"
+                    />
+
+                    {errors.password && (
+                      <span className="ml-1 block text-xs text-red-600">
+                        {errors.password.message}
+                      </span>
+                    )}
+                  </div>
+                )}
               />
 
               <div className="-mt-1 flex items-center justify-between gap-3">
@@ -154,11 +209,17 @@ export default function SignIn() {
               </div>
 
               <button
-                type="button"
+                type="submit"
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#24583b] text-sm font-semibold text-white shadow-[0_8px_18px_-10px_rgba(36,88,59,0.8)] transition hover:bg-[#1b472f]"
               >
-                Entrar
-                <ArrowRightIcon size={17} weight="bold" />
+                {isSubmitting ? (
+                  <span>carregando...</span>
+                ) : (
+                  <>
+                    Entrar
+                    <ArrowRightIcon size={17} weight="bold" />
+                  </>
+                )}
               </button>
             </form>
 
