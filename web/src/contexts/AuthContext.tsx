@@ -1,7 +1,26 @@
-import { createContext, type ReactNode } from "react";
+import {
+  createUserWithEmailAndPassword,
+  deleteUser,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { createContext, useEffect, useState, type ReactNode } from "react";
+import { auth, db } from "../services/firebaseConnection";
+import { toast } from "react-toastify";
+import type { User } from "../types/data";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { signInWithEmailAndPassword } from "firebase/auth/cordova";
 
 interface AuthContextProps {
-  name: string;
+  signed: boolean;
+  loading: boolean;
+  userInfo: User | null;
+  registerNewUser(
+    email: string,
+    password: string,
+    first_name: string,
+    second_name: string,
+  ): Promise<void>;
+  loginUser(email: string, password: string): Promise<void>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -12,9 +31,121 @@ interface AuthProviderProps {
 }
 
 export default function AuthProvider({ children }: AuthProviderProps) {
-  const name = "Marcio";
+  const [userInfo, setUserInfo] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const docRef = doc(db, "users", user.uid);
+
+          //  Getting all data from user authenticated
+          const userDocResponse = await getDoc(docRef);
+
+          const user_data: User = {
+            created_at: userDocResponse.data()?.created_at,
+            email: user.email!,
+            name: userDocResponse.data()?.name,
+            photo: userDocResponse.data()?.photo,
+          };
+          setUserInfo(user_data);
+          localStorage.setItem("@user_details", JSON.stringify(user_data));
+          setLoading(false);
+        } catch (error) {
+          toast.error("Erro ao buscar dados do usuário");
+          console.log(error);
+          throw error;
+        }
+      } else {
+        setUserInfo(null);
+        setLoading(false);
+      }
+    });
+
+    //  cleanup function - increase performance
+    return () => {
+      unsub();
+    };
+  }, []);
+
+  async function registerNewUser(
+    email: string,
+    password: string,
+    first_name: string,
+    second_name: string,
+  ) {
+    try {
+      //  Calling function of Firebase Authentication for create new "user"
+      await createUserWithEmailAndPassword(auth, email, password)
+        .then(async (values) => {
+          try {
+            //  Creating temporary data of new user
+            const user_data: User = {
+              name: `${first_name} ${second_name}`,
+              email: values.user.email!,
+              photo: `${first_name[0].toUpperCase()}${second_name[0].toUpperCase()}`,
+              created_at: new Date().toLocaleString("pt-BR", {
+                month: "2-digit",
+                year: "numeric",
+                day: "2-digit",
+              }),
+            };
+
+            //  Creating path for the new document to new user
+            const userRef = doc(db, "users", values.user.uid);
+
+            //  Calling function of Firebase Firestore for create the new document
+            await setDoc(userRef, user_data).then(() => {
+              toast.success("Usuário registrado com sucesso.");
+              localStorage.setItem("@user_details", JSON.stringify(user_data));
+              setUserInfo(user_data);
+            });
+          } catch (error) {
+            await deleteUser(values.user);
+            throw error;
+          }
+        })
+        .catch((error) => {
+          return error;
+        });
+    } catch (error) {
+      toast.error("Erro ao cadastrar usuário");
+      console.log(error);
+    }
+  }
+
+  async function loginUser(email: string, password: string) {
+    try {
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+
+      const docRef = doc(db, "users", user.uid);
+
+      const snapshot = await getDoc(docRef);
+
+      if (!snapshot.exists()) {
+        toast.error("Dados do usuário não encontrados.");
+        return;
+      }
+
+      console.log(snapshot.data());
+    } catch (error) {
+      toast.error("Erro ao fazer login.");
+      console.log(error);
+    }
+  }
 
   return (
-    <AuthContext.Provider value={{ name }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider
+      value={{
+        signed: !!userInfo,
+        loading,
+        userInfo,
+        registerNewUser,
+        loginUser,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
   );
 }
