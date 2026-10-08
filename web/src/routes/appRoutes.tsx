@@ -6,6 +6,8 @@ import Dashboard from "../pages/(painel)/Dashboard";
 import Products from "../pages/(painel)/Products";
 import NewProduct from "../pages/(painel)/Products/NewProduct";
 import Sales from "../pages/(painel)/Sales";
+import Private from "./Private";
+import NotFound from "../pages/NotFound";
 
 const router = createBrowserRouter([
   {
@@ -18,19 +20,39 @@ const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <Dashboard />,
+    element: (
+      <Private>
+        <Dashboard />
+      </Private>
+    ),
   },
   {
     path: "/products",
-    element: <Products />,
+    element: (
+      <Private>
+        <Products />
+      </Private>
+    ),
   },
   {
     path: "/new-product",
-    element: <NewProduct />,
+    element: (
+      <Private>
+        <NewProduct />
+      </Private>
+    ),
   },
   {
     path: "/sales",
-    element: <Sales />,
+    element: (
+      <Private>
+        <Sales />
+      </Private>
+    ),
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 
