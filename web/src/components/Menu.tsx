@@ -1,15 +1,17 @@
 import {
   ChartLineUpIcon,
   CurrencyDollarIcon,
+  SignOutIcon,
   SquaresFourIcon,
   TagIcon,
 } from "@phosphor-icons/react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import MenuNavigation from "./MenuNavigation";
+import { useContext } from "react";
+import { AuthContext } from "../contexts/AuthContext";
 
 export default function Menu() {
-  const { pathname } = useLocation();
-  const productsActive =
-    pathname === "/products" || pathname === "/new-product";
+  const { signOutUser } = useContext(AuthContext);
 
   return (
     <aside className="relative flex min-h-screen w-20 shrink-0 flex-col overflow-hidden bg-[#183b2b] px-3 py-6 text-white md:w-64 md:px-5 md:py-8">
@@ -44,49 +46,15 @@ export default function Menu() {
           MENU PRINCIPAL
         </p>
         <nav aria-label="Menu principal" className="space-y-1.5">
-          <NavLink
+          <MenuNavigation
+            icon={SquaresFourIcon}
+            label="Dashboard"
             to="/dashboard"
-            end
-            title="Dashboard"
-            className={({ isActive }) =>
-              `flex items-center justify-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors md:justify-start ${
-                isActive
-                  ? "bg-[#d6f2ca] text-[#183b2b] shadow-[0_8px_18px_-10px_rgba(0,0,0,0.35)]"
-                  : "text-white/65 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <SquaresFourIcon size={20} weight="duotone" />
-            <span className="hidden md:inline">Dashboard</span>
-          </NavLink>
-          <NavLink
-            to="/products"
-            title="Products"
-            className={({ isActive }) =>
-              `flex items-center justify-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors md:justify-start ${
-                isActive || productsActive
-                  ? "bg-[#d6f2ca] text-[#183b2b] shadow-[0_8px_18px_-10px_rgba(0,0,0,0.35)]"
-                  : "text-white/65 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <TagIcon size={20} weight="duotone" />
-            <span className="hidden md:inline">Products</span>
-          </NavLink>
-          <NavLink
-            to="/sales"
-            title="Sales"
-            className={({ isActive }) =>
-              `flex items-center justify-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors md:justify-start ${
-                isActive
-                  ? "bg-[#d6f2ca] text-[#183b2b] shadow-[0_8px_18px_-10px_rgba(0,0,0,0.35)]"
-                  : "text-white/65 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <CurrencyDollarIcon size={20} weight="duotone" />
-            <span className="hidden md:inline">Sales</span>
-          </NavLink>
+          />
+
+          <MenuNavigation icon={TagIcon} label="Products" to="/products" />
+
+          <MenuNavigation icon={CurrencyDollarIcon} label="Sales" to="/sales" />
         </nav>
       </div>
 
@@ -95,6 +63,14 @@ export default function Menu() {
         <br />
         Cresça com propósito
       </p>
+
+      <button
+        onClick={() => signOutUser()}
+        className="flex items-center mt-2 hover:bg-white/10 hover:text-white justify-center gap-3 rounded-xl p-3 text-sm font-medium transition-colors md:justify-start"
+      >
+        <SignOutIcon size={20} weight="duotone" />
+        Sair da conta
+      </button>
     </aside>
   );
 }

@@ -2,6 +2,7 @@ import {
   createUserWithEmailAndPassword,
   deleteUser,
   onAuthStateChanged,
+  signOut,
 } from "firebase/auth";
 import { createContext, useEffect, useState, type ReactNode } from "react";
 import { auth, db } from "../services/firebaseConnection";
@@ -21,6 +22,7 @@ interface AuthContextProps {
     second_name: string,
   ): Promise<void>;
   loginUser(email: string, password: string): Promise<void>;
+  signOutUser(): Promise<void>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -135,6 +137,19 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function signOutUser() {
+    try {
+      await signOut(auth).then(() => {
+        toast.success("Usuário desconectado.");
+        setUserInfo(null);
+        localStorage.removeItem("@user_details");
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -143,6 +158,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         userInfo,
         registerNewUser,
         loginUser,
+        signOutUser,
       }}
     >
       {children}
