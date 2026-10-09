@@ -1,20 +1,25 @@
 import {
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   deleteUser,
   onAuthStateChanged,
+  setPersistence,
+  browserSessionPersistence,
   signOut,
+  browserLocalPersistence,
 } from "firebase/auth";
 import { createContext, useEffect, useState, type ReactNode } from "react";
 import { auth, db } from "../services/firebaseConnection";
 import { toast } from "react-toastify";
 import type { User } from "../types/data";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { signInWithEmailAndPassword } from "firebase/auth/cordova";
 
 interface AuthContextProps {
   signed: boolean;
   loading: boolean;
   userInfo: User | null;
+  stayConnected: boolean;
+  setStayConnected: React.Dispatch<React.SetStateAction<boolean>>;
   registerNewUser(
     email: string,
     password: string,
@@ -35,6 +40,7 @@ interface AuthProviderProps {
 export default function AuthProvider({ children }: AuthProviderProps) {
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stayConnected, setStayConnected] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -119,18 +125,36 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
   async function loginUser(email: string, password: string) {
     try {
-      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      const typePersistence = stayConnected
+        ? browserLocalPersistence
+        : browserSessionPersistence;
 
-      const docRef = doc(db, "users", user.uid);
+      setPersistence(auth, typePersistence).then(async () => {
+        const { user } = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        );
 
-      const snapshot = await getDoc(docRef);
+        const docRef = doc(db, "users", user.uid);
 
-      if (!snapshot.exists()) {
-        toast.error("Dados do usuário não encontrados.");
-        return;
-      }
+        const snapshot = await getDoc(docRef);
 
-      console.log(snapshot.data());
+        if (!snapshot.exists()) {
+          toast.error("Dados do usuário não encontrados.");
+          return;
+        }
+
+        const snapshot_data: User = {
+          created_at: snapshot.data().created_at,
+          email: user.email!,
+          name: snapshot.data().name,
+          photo: snapshot.data().photo,
+        };
+
+        setUserInfo(snapshot_data);
+        localStorage.setItem("@user_details", JSON.stringify(snapshot_data));
+      });
     } catch (error) {
       toast.error("Erro ao fazer login.");
       console.log(error);
@@ -156,6 +180,8 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         signed: !!userInfo,
         loading,
         userInfo,
+        stayConnected,
+        setStayConnected,
         registerNewUser,
         loginUser,
         signOutUser,

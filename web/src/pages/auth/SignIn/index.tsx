@@ -1,8 +1,10 @@
 import {
   ArrowRightIcon,
   ChartLineUpIcon,
+  CheckSquareIcon,
   GoogleLogoIcon,
   LockKeyIcon,
+  SquareIcon,
   TrendUpIcon,
 } from "@phosphor-icons/react";
 import Input from "../../../components/Input";
@@ -16,7 +18,7 @@ export default function SignIn() {
   const { control, errors, handleLoginUser, handleSubmit, isSubmitting } =
     useLogin();
 
-  const { signed } = useContext(AuthContext);
+  const { signed, setStayConnected, stayConnected } = useContext(AuthContext);
 
   if (signed) {
     return <Navigate to="/dashboard" replace />;
@@ -193,13 +195,22 @@ export default function SignIn() {
               />
 
               <div className="-mt-1 flex items-center justify-between gap-3">
-                <label className="flex items-center gap-2 text-xs text-[#68746c]">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-[#cdd6ce] accent-[#285a3c]"
-                  />
-                  Manter conectado
-                </label>
+                <button
+                  type="button"
+                  onClick={() => setStayConnected(!stayConnected)}
+                  className="flex flex-row items-center gap-2"
+                >
+                  {stayConnected ? (
+                    <CheckSquareIcon size={20} />
+                  ) : (
+                    <SquareIcon size={20} />
+                  )}
+
+                  <span className="text-xs text-[#68746c]">
+                    Manter conectado
+                  </span>
+                </button>
+
                 <a
                   href="#"
                   className="text-xs font-semibold text-[#285a3c] hover:text-[#183b2b]"
