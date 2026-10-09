@@ -1,6 +1,7 @@
 import { useContext, useEffect, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
+import Menu from "../components/Menu";
 
 interface PrivateProps {
   children: ReactNode;
@@ -48,5 +49,11 @@ export default function Private({ children }: PrivateProps) {
     return <Navigate to={"/"} />;
   }
 
-  return children;
+  return (
+    <main className="flex flex-row w-full">
+      <Menu />
+
+      <div className="py-10 px-20">{children}</div>
+    </main>
+  );
 }
