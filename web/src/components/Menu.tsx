@@ -14,7 +14,7 @@ export default function Menu() {
   const [isCameraVisible, setIsCameraVisible] = useState(false);
 
   return (
-    <aside className="relative flex min-h-screen w-20 shrink-0 flex-col overflow-hidden bg-[#183b2b] px-3 py-6 text-white md:w-64 md:px-5 md:py-8">
+    <aside className="sticky top-0 flex h-screen w-20 shrink-0 flex-col overflow-hidden bg-[#183b2b] px-3 py-6 text-white md:w-64 md:px-5 md:py-8">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -right-28 -top-28 h-72 w-72 rounded-full border border-white/10"
