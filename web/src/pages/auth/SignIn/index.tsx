@@ -18,7 +18,8 @@ export default function SignIn() {
   const { control, errors, handleLoginUser, handleSubmit, isSubmitting } =
     useLogin();
 
-  const { signed, setStayConnected, stayConnected } = useContext(AuthContext);
+  const { signed, setStayConnected, authenticateWithGoogle, stayConnected } =
+    useContext(AuthContext);
 
   if (signed) {
     return <Navigate to="/dashboard" replace />;
@@ -122,6 +123,7 @@ export default function SignIn() {
             </div>
 
             <button
+              onClick={async () => await authenticateWithGoogle()}
               type="button"
               className="mt-8 flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#e4e9e4] bg-white text-sm font-medium text-[#27352d] transition-colors hover:bg-[#f8faf7]"
             >

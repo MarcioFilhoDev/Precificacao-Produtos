@@ -7,16 +7,24 @@ import {
   SparkleIcon,
 } from "@phosphor-icons/react";
 
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 import Input from "../../../components/Input";
 
 import { useSignUp } from "../../../hooks/useSignUp";
 import { Controller } from "react-hook-form";
+import { useContext } from "react";
+import { AuthContext } from "../../../contexts/AuthContext";
 
 export default function SignUp() {
   const { control, errors, handleSubmit, isSubmitting, handleRegisterNewUser } =
     useSignUp();
+
+  const { signed, authenticateWithGoogle } = useContext(AuthContext);
+
+  if (signed) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <main className="min-h-screen bg-[#f6f7f4] p-4 font-sans text-[#17241d] sm:p-6 lg:p-8">
@@ -113,6 +121,7 @@ export default function SignUp() {
             </div>
 
             <button
+              onClick={async () => await authenticateWithGoogle()}
               type="button"
               className="mt-7 flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#e4e9e4] bg-white text-sm font-medium text-[#27352d] transition-colors hover:bg-[#f8faf7]"
             >

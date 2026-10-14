@@ -7,6 +7,8 @@ import {
   browserSessionPersistence,
   signOut,
   browserLocalPersistence,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 import { createContext, useEffect, useState, type ReactNode } from "react";
 import { auth, db } from "../services/firebaseConnection";
@@ -28,6 +30,7 @@ interface AuthContextProps {
   ): Promise<void>;
   loginUser(email: string, password: string): Promise<void>;
   signOutUser(): Promise<void>;
+  authenticateWithGoogle(): Promise<void>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -174,6 +177,40 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  const GoogleProvider = new GoogleAuthProvider();
+
+  async function authenticateWithGoogle() {
+    try {
+      const response = await signInWithPopup(auth, GoogleProvider);
+
+      if (response) {
+        const user_data: User = {
+          name: response.user.displayName!,
+          email: response.user.email!,
+          photo: response.user.photoURL!,
+          created_at: new Date().toLocaleString("pt-BR", {
+            month: "2-digit",
+            year: "numeric",
+            day: "2-digit",
+          }),
+        };
+
+        //  Creating path for the new document to new user
+        const userRef = doc(db, "users", response.user.uid);
+
+        //  Calling function of Firebase Firestore for create the new document
+        await setDoc(userRef, user_data).then(() => {
+          toast.success("Usuário registrado com sucesso.");
+          localStorage.setItem("@user_details", JSON.stringify(user_data));
+          setUserInfo(user_data);
+        });
+      }
+    } catch (error) {
+      toast.error("Erro ao fazer login");
+      console.log(error);
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -185,6 +222,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         registerNewUser,
         loginUser,
         signOutUser,
+        authenticateWithGoogle,
       }}
     >
       {children}
