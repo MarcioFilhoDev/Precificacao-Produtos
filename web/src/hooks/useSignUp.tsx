@@ -38,10 +38,10 @@ const useSignUp = () => {
   } = useForm({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
-      first_name: "teste",
-      second_name: "teste",
-      email: "teste@teste.com",
-      password: "123123",
+      first_name: "",
+      second_name: "",
+      email: "",
+      password: "",
     },
   });
 
