@@ -1,8 +1,9 @@
 @import "tailwindcss";
+@import "./theme.css";
 
 body::selection {
-  background-color: #d6f2ca;
-  color: #183b2b;
+  background-color: var(--color-brand-200);
+  color: var(--color-brand-950);
 }
 
 button {

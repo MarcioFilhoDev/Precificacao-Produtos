@@ -1,0 +1,47 @@
+@theme {
+  --color-brand-950: #183b2b;
+  --color-brand-900: #1f4930;
+  --color-brand-800: #24583b;
+  --color-brand-700: #285a3c;
+  --color-brand-500: #6a9b73;
+  --color-brand-400: #a8d5a2;
+  --color-brand-300: #c6f0b4;
+  --color-brand-200: #d6f2ca;
+  --color-brand-100: #e9f4e5;
+
+  --color-canvas: #f6f7f4;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f5f7f4;
+  --color-surface-tint: #edf3eb;
+
+  --color-content: #17241d;
+  --color-content-strong: #27352d;
+  --color-content-heading: #29392e;
+  --color-content-label: #344139;
+  --color-content-secondary: #64766a;
+  --color-content-muted: #78827b;
+  --color-content-faint: #879087;
+  --color-content-subtle: #99a19b;
+  --color-content-placeholder: #a7afa9;
+  --color-content-meta: #8b968d;
+
+  --color-line: #e3e8e2;
+  --color-line-muted: #edf0ec;
+  --color-line-strong: #dfe6de;
+  --color-line-hover: #cbdac9;
+  --color-line-brand: #b9cbb8;
+
+  --color-accent-green: #315b3d;
+  --color-accent-gold: #79623c;
+  --color-accent-terracotta: #925847;
+  --color-accent-blue: #456579;
+  --color-accent-purple: #76567b;
+  --color-accent-teal: #3d6b62;
+
+  --color-accent-green-soft: #e9f4e5;
+  --color-accent-gold-soft: #f2eee3;
+  --color-accent-terracotta-soft: #f6e9e5;
+  --color-accent-blue-soft: #e8eff3;
+  --color-accent-purple-soft: #f2eaf3;
+  --color-accent-teal-soft: #e6f1ef;
+}

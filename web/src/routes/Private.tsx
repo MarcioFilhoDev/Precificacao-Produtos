@@ -24,19 +24,19 @@ export default function Private({ children }: PrivateProps) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f7f4] px-6 text-[#17241d]">
+      <div className="flex min-h-screen items-center justify-center bg-canvas px-6 text-content">
         <div
           className="flex flex-col items-center gap-4 text-center"
           role="status"
           aria-live="polite"
         >
           <span
-            className="h-10 w-10 animate-spin rounded-full border-[3px] border-[#dce6dc] border-t-[#285a3c]"
+            className="h-10 w-10 animate-spin rounded-full border-[3px] border-brand-100 border-t-brand-700"
             aria-hidden="true"
           />
           <div>
             <h1 className="text-base font-semibold">Buscando seus dados</h1>
-            <p className="mt-1 text-sm text-[#78827b]">
+            <p className="mt-1 text-sm text-content-muted">
               Aguarde enquanto carregamos sua sessão.
             </p>
           </div>
@@ -53,7 +53,7 @@ export default function Private({ children }: PrivateProps) {
     <main className="flex flex-row w-full">
       <Menu />
 
-      <div className="py-10 px-20">{children}</div>
+      <div className="flex py-10 px-20">{children}</div>
     </main>
   );
 }

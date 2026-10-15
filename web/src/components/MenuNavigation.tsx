@@ -19,7 +19,7 @@ export default function MenuNavigation({
       className={({ isActive }) =>
         `flex items-center justify-center gap-3 rounded-xl p-3 text-sm font-medium transition-colors md:justify-start ${
           isActive
-            ? "bg-[#d6f2ca] text-[#183b2b] shadow-[0_8px_18px_-10px_rgba(0,0,0,0.35)]"
+            ? "bg-brand-200 text-brand-950 shadow-md shadow-black/15"
             : "text-white/65 hover:bg-white/10 hover:text-white"
         }`
       }

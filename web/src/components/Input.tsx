@@ -8,12 +8,12 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export default function Input({ label, children, ...props }: InputProps) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-medium text-[#344139]">
+      <span className="mb-2 block text-sm font-medium text-content-label">
         {label}
       </span>
       <input
         {...props}
-        className="h-12 w-full rounded-xl border border-[#e3e8e2] bg-white px-4 text-sm text-[#27352d] outline-none transition placeholder:text-[#a7afa9] focus:border-[#6a9b73] focus:ring-4 focus:ring-[#dcebdd]/60"
+        className="h-12 w-full rounded-xl border border-line bg-surface px-4 text-sm text-content-strong outline-none transition placeholder:text-content-placeholder focus:border-brand-500 focus:ring-4 focus:ring-brand-200/60"
       />
 
       {children}

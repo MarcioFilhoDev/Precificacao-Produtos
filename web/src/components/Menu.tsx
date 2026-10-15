@@ -14,7 +14,7 @@ export default function Menu() {
   const [isCameraVisible, setIsCameraVisible] = useState(false);
 
   return (
-    <aside className="sticky top-0 flex h-screen w-20 shrink-0 flex-col overflow-hidden bg-[#183b2b] px-3 py-6 text-white md:w-64 md:px-5 md:py-8">
+    <aside className="sticky top-0 flex h-screen w-20 shrink-0 flex-col overflow-hidden bg-brand-950 px-3 py-6 text-white md:w-64 md:px-5 md:py-8">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -right-28 -top-28 h-72 w-72 rounded-full border border-white/10"
@@ -25,7 +25,7 @@ export default function Menu() {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-36 -left-24 h-72 w-72 rounded-full bg-[#a8d5a2]/10 blur-3xl"
+        className="pointer-events-none absolute -bottom-36 -left-24 h-72 w-72 rounded-full bg-brand-400/10 blur-3xl"
       />
 
       <div className="flex flex-col items-center gap-2 justify-center">
@@ -52,8 +52,8 @@ export default function Menu() {
           />
 
           {userInfo?.photo?.length === 2 ? (
-            <div className="bg-[#d6f2ca] w-full h-full flex justify-center items-center">
-              <h1 className="text-[#183b2b] text-5xl font-bold tracking-[2px]">
+            <div className="bg-brand-200 flex h-full w-full items-center justify-center">
+              <h1 className="text-brand-950 text-5xl font-bold tracking-[2px]">
                 {userInfo?.photo}
               </h1>
             </div>
@@ -74,7 +74,7 @@ export default function Menu() {
           </span>
         </label>
 
-        <h1 className="text-[#d6f2ca] selection:text-[#183b2b]">
+        <h1 className="text-brand-200 selection:text-brand-950">
           {userInfo?.name}
         </h1>
       </div>
