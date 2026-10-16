@@ -8,30 +8,49 @@ export type User = {
 
 export type Products = {
   id?: string;
-  id_user: string;
+  id_user?: string;
   name: string;
   sale_price: number;
-  ingredients: Ingredients[];
+  list_of_ingredients: Ingredients[];
+  production_quantity: number;
+  product_cost: number;
+  labor_hours?: number;
+  hourly_rate?: number;
+  labor_cost?: number;
+  production_cost?: number;
+  profit_percentage?: number;
+  profit_amount?: number;
   created_at: string;
   last_updated: string;
 };
 
 export type Sales = {
   id?: string;
-  id_user: string;
-  id_product: string;
+  product_name: string;
   quantity: number;
   total_sale_price: number;
   sale_date: string;
 };
 
 export type Ingredients = {
-  id?: string;
-  name: string;
-  unity: string;
-  quantity: number;
+  ingredient_index: number;
+  ingredient_name: string;
+  purchase_quantity: number;
+  purchase_unity: string;
+  used_quantity: number;
+  used_unity: string;
   purchase_price: number;
   brand: string;
-  created_at: string;
-  last_updated: string;
+  ingredient_cost?: number;
+};
+
+export type IngredientForm = {
+  ingredient_index: number;
+  ingredient_name: string;
+  purchase_quantity: number;
+  purchase_unity: string;
+  used_quantity: number;
+  used_unity: string;
+  purchase_price: number;
+  brand: string;
 };
