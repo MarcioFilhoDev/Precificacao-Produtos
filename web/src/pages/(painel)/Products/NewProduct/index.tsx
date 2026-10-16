@@ -213,6 +213,8 @@ export default function NewProduct() {
                 <div className="flex flex-col gap-2">
                   <Input
                     type="number"
+                    min={0}
+                    step={0.5}
                     label="Horas de trabalho"
                     placeholder="Ex.: 2"
                     value={field.value}

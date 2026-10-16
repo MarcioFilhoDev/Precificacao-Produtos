@@ -1,12 +1,12 @@
 import { TrashIcon } from "@phosphor-icons/react";
-import { forwardRef, useEffect, useImperativeHandle } from "react";
+import { forwardRef, useEffect, useId, useImperativeHandle } from "react";
 import { Controller } from "react-hook-form";
 import {
   useNewIngredient,
   type IngredientValues,
 } from "../hooks/useNewIngredient";
 import { calculateIngredientCost } from "../utils/ingredientCost";
-import Input from "./Input";
+import Input, { InputLabel } from "./Input";
 
 const ingredientUnits = [
   { label: "Miligramas (mg)", value: "mg" },
@@ -44,6 +44,8 @@ const IngredientCard = forwardRef<IngredientCardHandle, IngredientCardProps>(
   ) {
     const { control, errors, validateIngredient, watch } = useNewIngredient();
     const ingredient = watch();
+    const purchaseUnitId = useId();
+    const usedUnitId = useId();
     const cost = calculateIngredientCost(ingredient);
     const currencyFormatter = new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -81,6 +83,11 @@ const IngredientCard = forwardRef<IngredientCardHandle, IngredientCardProps>(
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="col-span-full border-b border-line-muted pb-2">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              Identificação
+            </h4>
+          </div>
           <Controller
             control={control}
             name="ingredient_name"
@@ -88,6 +95,7 @@ const IngredientCard = forwardRef<IngredientCardHandle, IngredientCardProps>(
               <div className="flex flex-col gap-2">
                 <Input
                   label="Nome do ingrediente"
+                  helpText="Digite o nome usado para identificar esse ingrediente na receita."
                   placeholder="Ex.: Farinha de trigo"
                   value={value}
                   onChange={onChange}
@@ -109,6 +117,7 @@ const IngredientCard = forwardRef<IngredientCardHandle, IngredientCardProps>(
               <div className="flex flex-col gap-2">
                 <Input
                   label="Marca"
+                  helpText="Informe a marca da embalagem comprada. Isso ajuda a reconhecer o produto."
                   placeholder="Ex.: Marca do produto"
                   value={value}
                   onChange={onChange}
@@ -117,6 +126,76 @@ const IngredientCard = forwardRef<IngredientCardHandle, IngredientCardProps>(
                 {errors.brand?.message && (
                   <span className="ml-1 block text-xs text-red-600">
                     {errors.brand.message}
+                  </span>
+                )}
+              </div>
+            )}
+          />
+
+          <div className="col-span-full border-b border-line-muted pb-2">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              Compra
+            </h4>
+          </div>
+          <Controller
+            control={control}
+            name="purchase_quantity"
+            render={({ field: { value, onChange } }) => (
+              <div className="flex flex-col gap-2">
+                <Input
+                  type="number"
+                  min={0}
+                  label="Quantidade comprada"
+                  helpText="Quanto você comprou na unidade selecionada. Exemplo: 1,5 kg ou 2 litros."
+                  placeholder="Ex.: 1"
+                  value={value}
+                  onChange={(event) => onChange(Number(event.target.value))}
+                />
+                {errors.purchase_quantity?.message && (
+                  <span className="ml-1 block text-xs text-red-600">
+                    {errors.purchase_quantity.message}
+                  </span>
+                )}
+                {ingredient.purchase_quantity > 0 && (
+                  <span className="ml-1 text-xs text-content-faint">
+                    Total da compra:{" "}
+                    {currencyFormatter.format(
+                      ingredient.purchase_unit_price *
+                        ingredient.purchase_quantity,
+                    )}
+                  </span>
+                )}
+              </div>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="purchase_unity"
+            render={({ field }) => (
+              <div>
+                <InputLabel
+                  label="Unidade de compra"
+                  helpText="Escolha a unidade à qual se referem a quantidade comprada e o preço informado."
+                  htmlFor={purchaseUnitId}
+                  helpId={`${purchaseUnitId}-help`}
+                />
+                <select
+                  {...field}
+                  id={purchaseUnitId}
+                  aria-describedby={`${purchaseUnitId}-help`}
+                  className="h-12 w-full rounded-xl border border-line bg-surface px-4 text-sm text-content-strong outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-200/60"
+                >
+                  <option value="">Selecione uma unidade</option>
+                  {ingredientUnits.map((unit) => (
+                    <option key={unit.value} value={unit.value}>
+                      {unit.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.purchase_unity?.message && (
+                  <span className="ml-1 block text-xs text-red-600">
+                    {errors.purchase_unity.message}
                   </span>
                 )}
               </div>
@@ -132,8 +211,9 @@ const IngredientCard = forwardRef<IngredientCardHandle, IngredientCardProps>(
                   type="number"
                   min={0}
                   step={0.01}
-                  label="Preço por unidade de compra"
-                  placeholder="Ex.: R$ 4,00 por litro"
+                  label="Preço da unidade"
+                  helpText={`Preço de 1 ${ingredient.purchase_unity || "unidade"} da unidade selecionada acima. Exemplo: R$ 4 por litro.`}
+                  placeholder="Ex.: R$ 4,00"
                   value={value}
                   onChange={(event) => onChange(Number(event.target.value))}
                 />
@@ -142,82 +222,24 @@ const IngredientCard = forwardRef<IngredientCardHandle, IngredientCardProps>(
                     {errors.purchase_unit_price.message}
                   </span>
                 )}
-                <span className="ml-1 text-xs text-content-faint">
-                  Informe o preço de 1{" "}
-                  {ingredient.purchase_unity || "unidade"}.
-                </span>
               </div>
             )}
           />
 
-          <Controller
-            control={control}
-            name="purchase_quantity"
-            render={({ field: { value, onChange } }) => (
-              <div className="flex flex-col gap-2">
-                <Input
-                  type="number"
-                  min={0}
-                  label="Quantidade comprada"
-                  placeholder="Ex.: 1"
-                  value={value}
-                  onChange={(event) => onChange(Number(event.target.value))}
-                />
-                {errors.purchase_quantity?.message && (
-                  <span className="ml-1 block text-xs text-red-600">
-                    {errors.purchase_quantity.message}
-                  </span>
-                )}
-                {ingredient.purchase_quantity > 0 && (
-                  <span className="ml-1 text-xs text-content-faint">
-                    Total comprado:{" "}
-                    {currencyFormatter.format(
-                      ingredient.purchase_unit_price *
-                        ingredient.purchase_quantity,
-                    )}
-                  </span>
-                )}
-              </div>
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="purchase_unity"
-            render={({ field }) => (
-              <div className="flex flex-col gap-2">
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-content-label">
-                    Unidade de compra
-                  </span>
-                  <select
-                    {...field}
-                    className="h-12 w-full rounded-xl border border-line bg-surface px-4 text-sm text-content-strong outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-200/60"
-                  >
-                    <option value="">Selecione uma unidade</option>
-                    {ingredientUnits.map((unit) => (
-                      <option key={unit.value} value={unit.value}>
-                        {unit.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                {errors.purchase_unity?.message && (
-                  <span className="ml-1 block text-xs text-red-600">
-                    {errors.purchase_unity.message}
-                  </span>
-                )}
-              </div>
-            )}
-          />
-
+          <div className="col-span-full border-b border-line-muted pb-2">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              Uso na receita
+            </h4>
+          </div>
           <Controller
             control={control}
             name="used_quantity"
             render={({ field: { value, onChange } }) => (
               <div className="flex flex-col gap-2">
                 <Input
+                  type="number"
                   label="Quantidade usada"
+                  helpText="Quanto desse ingrediente entra nesta receita. Você pode escolher uma unidade diferente da compra, como comprar em kg e usar em g."
                   placeholder="Ex.: 250"
                   value={value}
                   onChange={(event) =>
@@ -237,23 +259,26 @@ const IngredientCard = forwardRef<IngredientCardHandle, IngredientCardProps>(
             control={control}
             name="used_unity"
             render={({ field }) => (
-              <div className="flex flex-col gap-2">
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-content-label">
-                    Unidade usada
-                  </span>
-                  <select
-                    {...field}
-                    className="h-12 w-full rounded-xl border border-line bg-surface px-4 text-sm text-content-strong outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-200/60"
-                  >
-                    <option value="">Selecione uma unidade</option>
-                    {ingredientUnits.map((unit) => (
-                      <option key={unit.value} value={unit.value}>
-                        {unit.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              <div>
+                <InputLabel
+                  label="Unidade usada"
+                  helpText="Selecione a unidade da quantidade usada na receita. Conversões entre unidades de massa e entre unidades de volume são automáticas."
+                  htmlFor={usedUnitId}
+                  helpId={`${usedUnitId}-help`}
+                />
+                <select
+                  {...field}
+                  id={usedUnitId}
+                  aria-describedby={`${usedUnitId}-help`}
+                  className="h-12 w-full rounded-xl border border-line bg-surface px-4 text-sm text-content-strong outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-200/60"
+                >
+                  <option value="">Selecione uma unidade</option>
+                  {ingredientUnits.map((unit) => (
+                    <option key={unit.value} value={unit.value}>
+                      {unit.label}
+                    </option>
+                  ))}
+                </select>
                 {errors.used_unity?.message && (
                   <span className="ml-1 block text-xs text-red-600">
                     {errors.used_unity.message}
@@ -264,9 +289,10 @@ const IngredientCard = forwardRef<IngredientCardHandle, IngredientCardProps>(
           />
 
           <div>
-            <span className="mb-2 block text-sm font-medium text-content-label">
-              Custo do ingrediente
-            </span>
+            <InputLabel
+              label="Custo do ingrediente"
+              helpText="Valor da quantidade usada nesta receita, calculado proporcionalmente ao preço e à quantidade comprada."
+            />
             <output className="flex h-12 items-center rounded-xl border border-line bg-surface-tint px-3.5 text-sm font-semibold text-accent-green">
               {cost === undefined ? "—" : currencyFormatter.format(cost)}
             </output>
