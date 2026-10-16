@@ -39,7 +39,7 @@ export type Ingredients = {
   purchase_unity: string;
   used_quantity: number;
   used_unity: string;
-  purchase_price: number;
+  purchase_unit_price: number;
   brand: string;
   ingredient_cost?: number;
 };
@@ -51,6 +51,6 @@ export type IngredientForm = {
   purchase_unity: string;
   used_quantity: number;
   used_unity: string;
-  purchase_price: number;
+  purchase_unit_price: number;
   brand: string;
 };

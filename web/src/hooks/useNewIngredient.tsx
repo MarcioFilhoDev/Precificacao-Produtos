@@ -4,11 +4,11 @@ import { z } from "zod";
 
 const IngredientFieldsSchema = z.object({
   ingredient_name: z.string().trim().min(1, "O nome é obrigatório"),
-  purchase_quantity: z.number().positive("A quantidade deve ser maior que zero"),
+  purchase_quantity: z.number().positive("A quantidade comprada deve ser maior que zero"),
   purchase_unity: z.string().trim().min(1, "A unidade deve ser informada"),
   used_quantity: z.number().positive("A quantidade deve ser maior que zero"),
   used_unity: z.string().trim().min(1, "A unidade deve ser informada"),
-  purchase_price: z.number().nonnegative("O valor não pode ser negativo"),
+  purchase_unit_price: z.number().nonnegative("O valor não pode ser negativo"),
   brand: z.string().trim().min(1, "A marca é obrigatória"),
 });
 
@@ -35,7 +35,7 @@ const useNewIngredient = () => {
       purchase_unity: "",
       used_quantity: 0,
       used_unity: "",
-      purchase_price: 0,
+      purchase_unit_price: 0,
       brand: "",
     },
   });

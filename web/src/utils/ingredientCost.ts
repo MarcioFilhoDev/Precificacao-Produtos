@@ -1,5 +1,5 @@
 interface IngredientCostInput {
-  purchase_price: number;
+  purchase_unit_price: number;
   purchase_quantity: number;
   purchase_unity: string;
   used_quantity: number;
@@ -84,14 +84,14 @@ function toBaseQuantity(quantity: number, unit: string) {
 }
 
 export function calculateIngredientCost({
-  purchase_price,
+  purchase_unit_price,
   purchase_quantity,
   purchase_unity,
   used_quantity,
   used_unity,
 }: IngredientCostInput): number | undefined {
   if (
-    !Number.isFinite(purchase_price) ||
+    !Number.isFinite(purchase_unit_price) ||
     !Number.isFinite(purchase_quantity) ||
     !Number.isFinite(used_quantity) ||
     purchase_quantity <= 0 ||
@@ -100,11 +100,11 @@ export function calculateIngredientCost({
     return undefined;
   }
 
-  const purchase = toBaseQuantity(purchase_quantity, purchase_unity);
+  const purchaseUnit = toBaseQuantity(1, purchase_unity);
   const used = toBaseQuantity(used_quantity, used_unity);
-  if (purchase.dimension !== used.dimension) {
+  if (purchaseUnit.dimension !== used.dimension) {
     return undefined;
   }
 
-  return (purchase_price * used.quantity) / purchase.quantity;
+  return (purchase_unit_price * used.quantity) / purchaseUnit.quantity;
 }

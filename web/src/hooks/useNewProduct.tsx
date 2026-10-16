@@ -65,7 +65,7 @@ const useNewProduct = () => {
         ? null
         : production_cost / product.production_quantity;
 
-    return {
+    const finalProduct = {
       ...product,
       labor_cost,
       production_cost,
@@ -81,10 +81,12 @@ const useNewProduct = () => {
       list_of_ingredients: ingredients.map((ingredient, index) => {
         const ingredientCost = ingredientCosts[index];
         return ingredientCost === undefined
-        ? ingredient
-        : { ...ingredient, ingredient_cost: ingredientCost };
+          ? ingredient
+          : { ...ingredient, ingredient_cost: ingredientCost };
       }),
     };
+
+    return finalProduct;
   }
 
   return {
