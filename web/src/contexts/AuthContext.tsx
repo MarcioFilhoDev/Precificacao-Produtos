@@ -55,6 +55,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           const userDocResponse = await getDoc(docRef);
 
           const user_data: User = {
+            id: user.uid,
             created_at: userDocResponse.data()?.created_at,
             email: user.email!,
             name: userDocResponse.data()?.name,
@@ -93,6 +94,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           try {
             //  Creating temporary data of new user
             const user_data: User = {
+              id: values.user.uid,
               name: `${first_name} ${second_name}`,
               email: values.user.email!,
               photo: `${first_name[0].toUpperCase()}${second_name[0].toUpperCase()}`,
@@ -149,6 +151,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         }
 
         const snapshot_data: User = {
+          id: user.uid,
           created_at: snapshot.data().created_at,
           email: user.email!,
           name: snapshot.data().name,
@@ -185,6 +188,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
       if (response) {
         const user_data: User = {
+          id: response.user.uid,
           name: response.user.displayName!,
           email: response.user.email!,
           photo: response.user.photoURL!,

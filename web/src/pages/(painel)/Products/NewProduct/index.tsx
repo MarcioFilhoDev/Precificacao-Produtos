@@ -18,6 +18,8 @@ export default function NewProduct() {
     removeIngredient,
     updateIngredientUsage,
     handleSubmit,
+    handleCreateProduct,
+    isSubmitting,
     values,
     ingredientCosts,
     totalIngredientCost,
@@ -43,7 +45,9 @@ export default function NewProduct() {
         </p>
       </header>
 
-      <form onSubmit={handleSubmit} noValidate>
+      <form
+        onSubmit={handleSubmit(async (data) => await handleCreateProduct(data))}
+      >
         <section className="mb-5 w-full rounded-2xl border border-brand-200 bg-brand-50 p-5 shadow-sm sm:p-6">
           <p className="text-sm font-medium text-content-muted">
             Custo dos ingredientes
@@ -315,9 +319,10 @@ export default function NewProduct() {
         <button
           id="show-product-payload"
           type="submit"
+          disabled={isSubmitting}
           className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-950/20 transition hover:bg-brand-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700"
         >
-          Mostrar dados para salvar
+          Salvar
         </button>
       </form>
     </section>

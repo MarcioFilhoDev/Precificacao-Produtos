@@ -1,6 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { addDoc, collection } from "firebase/firestore";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { toast } from "react-toastify";
 import { z } from "zod";
+import { db } from "../services/firebaseConnection";
+import { useContext } from "react";
+import { AuthContext } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const unitSchema = z.enum(["kg", "g", "l", "ml", "un"]);
 const usageSchema = z.enum(["complete", "partial"]);
@@ -159,7 +165,13 @@ const defaultIngredient = (usage: IngredientUsage): IngredientFormValues => ({
 });
 
 const useNewProduct = () => {
-  const form = useForm<ProductFormValues>({
+  const {
+    control,
+    handleSubmit,
+    getValues,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<ProductFormValues>({
     resolver: zodResolver(ProductSchema),
     defaultValues: {
       name: "",
@@ -171,44 +183,45 @@ const useNewProduct = () => {
       ingredients: [],
     },
   });
+
   const ingredients = useFieldArray({
-    control: form.control,
+    control,
     name: "ingredients",
   });
   const watchedIngredients = useWatch({
-    control: form.control,
+    control,
     name: "ingredients",
     defaultValue: [],
   });
   const includeWorkHours = useWatch({
-    control: form.control,
+    control,
     name: "includeWorkHours",
     defaultValue: false,
   });
   const productionQuantity = useWatch({
-    control: form.control,
+    control,
     name: "productionQuantity",
     defaultValue: "",
   });
   const profitPercentage = useWatch({
-    control: form.control,
+    control,
     name: "profitPercentage",
     defaultValue: "30",
   });
   const workHours = useWatch({
-    control: form.control,
+    control,
     name: "workHours",
     defaultValue: "",
   });
   const hourlyRate = useWatch({
-    control: form.control,
+    control,
     name: "hourlyRate",
     defaultValue: "",
   });
   const ingredientValues = ingredients.fields.map(
     (_, index) =>
       watchedIngredients[index] ??
-      form.getValues(`ingredients.${index}`) ??
+      getValues(`ingredients.${index}`) ??
       defaultIngredient("complete"),
   );
 
@@ -217,8 +230,8 @@ const useNewProduct = () => {
   }
 
   function updateIngredientUsage(index: number) {
-    const currentUsage = form.getValues(`ingredients.${index}.usage`);
-    form.setValue(
+    const currentUsage = getValues(`ingredients.${index}.usage`);
+    setValue(
       `ingredients.${index}.usage`,
       currentUsage === "complete" ? "partial" : "complete",
       { shouldDirty: true, shouldValidate: true },
@@ -250,7 +263,16 @@ const useNewProduct = () => {
       ? null
       : unitProductCost + profitAmountPerUnit;
 
-  function handleCreateProduct(product: ProductFormValues) {
+  const { userInfo } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  async function handleCreateProduct(product: ProductFormValues) {
+    const userId = userInfo?.id;
+    if (!userId) {
+      toast.error("Não foi possível identificar o usuário.");
+      return;
+    }
+
     const submittedLaborCost = product.includeWorkHours
       ? Number(product.workHours) * Number(product.hourlyRate)
       : 0;
@@ -304,20 +326,28 @@ const useNewProduct = () => {
       }),
     };
 
-    console.log(
-      "Dados do produto para salvar no banco de dados:",
-      databasePayload,
-    );
+    try {
+      const productsRef = collection(db, "products", userId, "products");
+      await addDoc(productsRef, databasePayload);
+      toast.success("Produto salvo com sucesso!");
+      navigate("/products");
+    } catch (error) {
+      toast.error("Erro ao registrar novo produto");
+      console.log(error);
+      throw error;
+    }
   }
 
   return {
-    control: form.control,
-    errors: form.formState.errors,
+    control,
+    errors,
+    isSubmitting,
     fields: ingredients.fields,
     addIngredient,
     removeIngredient: ingredients.remove,
     updateIngredientUsage,
-    handleSubmit: form.handleSubmit(handleCreateProduct),
+    handleSubmit,
+    handleCreateProduct,
     values: { ingredients: ingredientValues, includeWorkHours },
     ingredientCosts,
     totalIngredientCost,
