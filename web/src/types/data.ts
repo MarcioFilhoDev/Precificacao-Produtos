@@ -8,7 +8,6 @@ export type User = {
 
 export type Products = {
   id?: string;
-  id_user?: string;
   name: string;
   sale_price: number;
   list_of_ingredients: Ingredients[];
@@ -17,7 +16,7 @@ export type Products = {
   labor_hours?: number;
   hourly_rate?: number;
   labor_cost?: number;
-  production_cost?: number;
+  production_cost: number;
   profit_percentage?: number;
   profit_amount?: number;
   created_at: string;
@@ -26,6 +25,7 @@ export type Products = {
 
 export type Sales = {
   id?: string;
+  user_id: string;
   product_name: string;
   quantity: number;
   total_sale_price: number;
@@ -35,22 +35,11 @@ export type Sales = {
 export type Ingredients = {
   ingredient_index: number;
   ingredient_name: string;
-  purchase_quantity: number;
-  purchase_unity: string;
+  purchase_quantity?: number;
+  purchase_unity?: string;
   used_quantity: number;
   used_unity: string;
-  purchase_unit_price: number;
+  purchase_price: number;
   brand: string;
   ingredient_cost?: number;
-};
-
-export type IngredientForm = {
-  ingredient_index: number;
-  ingredient_name: string;
-  purchase_quantity: number;
-  purchase_unity: string;
-  used_quantity: number;
-  used_unity: string;
-  purchase_unit_price: number;
-  brand: string;
 };

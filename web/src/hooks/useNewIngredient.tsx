@@ -1,54 +1,71 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const IngredientFieldsSchema = z.object({
-  ingredient_name: z.string().trim().min(1, "O nome é obrigatório"),
-  purchase_quantity: z.number().positive("A quantidade comprada deve ser maior que zero"),
-  purchase_unity: z.string().trim().min(1, "A unidade deve ser informada"),
-  used_quantity: z.number().positive("A quantidade deve ser maior que zero"),
-  used_unity: z.string().trim().min(1, "A unidade deve ser informada"),
-  purchase_unit_price: z.number().nonnegative("O valor não pode ser negativo"),
-  brand: z.string().trim().min(1, "A marca é obrigatória"),
-});
+const usageSchema = z.enum(["complete", "partial"]);
+const unitSchema = z.enum(["kg", "g", "l", "ml", "un"]);
 
-const IngredientSchema = IngredientFieldsSchema.extend({
-  ingredient_index: z.number().int().nonnegative(),
-});
+const positiveNumberInput = z
+  .string()
+  .trim()
+  .min(1, "Campo obrigatório")
+  .refine((value) => {
+    const number = Number(value);
+    return Number.isFinite(number) && number > 0;
+  }, "Informe um número maior que zero");
 
-export type IngredientFormValues = z.infer<typeof IngredientFieldsSchema>;
-export type IngredientValues = z.infer<typeof IngredientSchema>;
+const nonNegativeNumberInput = z
+  .string()
+  .trim()
+  .min(1, "Campo obrigatório")
+  .refine((value) => {
+    const number = Number(value);
+    return Number.isFinite(number) && number >= 0;
+  }, "Informe um valor igual ou maior que zero");
 
-const useNewIngredient = () => {
-  const {
-    control,
-    getValues,
-    trigger,
-    watch,
-    formState: { errors },
-  } = useForm<IngredientFormValues>({
-    resolver: zodResolver(IngredientFieldsSchema),
-    mode: "onTouched",
-    defaultValues: {
-      ingredient_name: "",
-      purchase_quantity: 0,
-      purchase_unity: "",
-      used_quantity: 0,
-      used_unity: "",
-      purchase_unit_price: 0,
-      brand: "",
-    },
-  });
-
-  async function validateIngredient(ingredientIndex: number) {
-    const isValid = await trigger();
-
-    return isValid
-      ? { ...getValues(), ingredient_index: ingredientIndex }
-      : undefined;
-  }
-
-  return { control, errors, validateIngredient, watch };
+const unitCategory: Record<z.infer<typeof unitSchema>, string> = {
+  kg: "mass",
+  g: "mass",
+  l: "volume",
+  ml: "volume",
+  un: "count",
 };
 
-export { useNewIngredient, IngredientSchema };
+export const IngredientSchema = z
+  .object({
+    name: z.string().trim().min(1, "Informe o nome do ingrediente"),
+    usage: usageSchema,
+    packageQuantity: positiveNumberInput,
+    packageUnit: unitSchema,
+    usedQuantity: z.string(),
+    usedUnit: unitSchema,
+    price: nonNegativeNumberInput,
+  })
+  .superRefine((ingredient, ctx) => {
+    if (ingredient.usage !== "partial") return;
+
+    const usedQuantity = ingredient.usedQuantity.trim();
+    const parsedQuantity = Number(usedQuantity);
+
+    if (
+      !usedQuantity ||
+      !Number.isFinite(parsedQuantity) ||
+      parsedQuantity <= 0
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["usedQuantity"],
+        message: "Informe uma quantidade usada maior que zero",
+      });
+    }
+
+    if (
+      unitCategory[ingredient.packageUnit] !== unitCategory[ingredient.usedUnit]
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["usedUnit"],
+        message: "A unidade usada deve ser compatível com a unidade comprada",
+      });
+    }
+  });
+
+export type IngredientFormData = z.infer<typeof IngredientSchema>;
