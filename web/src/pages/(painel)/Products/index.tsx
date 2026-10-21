@@ -1,7 +1,39 @@
 import { PlusIcon } from "@phosphor-icons/react";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import type { Products } from "../../../types/data";
+import { AuthContext } from "../../../contexts/AuthContext";
+import { collection, getDocs, query } from "firebase/firestore";
+import { db } from "../../../services/firebaseConnection";
+import ProductItem from "../../../components/ProductItem";
 
 export default function Products() {
+  const { userInfo } = useContext(AuthContext);
+
+  const [products, setProducts] = useState<Products[] | []>([]);
+
+  useEffect(() => {
+    async function getAllProducts() {
+      const userId = userInfo?.id;
+
+      if (!userId) {
+        return;
+      }
+
+      const q = query(collection(db, "products", userId, "products"));
+
+      const snapshot = await getDocs(q);
+      setProducts(
+        snapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        })) as Products[],
+      );
+    }
+
+    getAllProducts();
+  }, [userInfo]);
+
   return (
     <section className="w-full max-w-6xl text-content">
       <header className="mb-9 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
@@ -29,63 +61,14 @@ export default function Products() {
           Produtos cadastrados
         </h2>
         <span className="rounded-full bg-surface-tint px-3 py-1 text-xs font-semibold text-accent-green">
-          {/* {products.length} {products.length === 1 ? "produto" : "produtos"} */}
+          {products.length} {products.length === 1 ? "produto" : "produtos"}
         </span>
       </div>
 
       <ul className="grid list-none grid-cols-1 gap-4 p-0 xl:grid-cols-2">
-        {/* {products.map((product, index) => (
-          <li key={product.id}>
-            <article className="group h-full rounded-2xl border border-line bg-surface p-5 shadow-md shadow-content/10 transition duration-200 hover:-translate-y-0.5 hover:border-line-hover hover:shadow-lg hover:shadow-content/10 sm:p-6">
-              <div className="flex items-start gap-4">
-                <div
-                  className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${cardAccents[index % cardAccents.length]}`}
-                  aria-hidden="true"
-                >
-                  <PackageIcon size={24} weight="duotone" />
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
-                    <div className="min-w-0">
-                      <h3 className="truncate text-base font-semibold text-content-strong sm:text-lg">
-                        {product.name}
-                      </h3>
-                      <p className="mt-1 text-xs text-content-faint">
-                        Atualizado em{" "}
-                        {dateFormatter.format(new Date(product.last_updated))}
-                      </p>
-                    </div>
-                    <p className="shrink-0 text-lg font-semibold tracking-tight text-brand-700">
-                      {currencyFormatter.format(product.sale_price)}
-                    </p>
-                  </div>
-
-                  <div className="mt-5 border-t border-line-muted pt-4">
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      <p className="text-xs font-medium text-content-secondary">
-                        Ingredientes
-                      </p>
-                      <span className="text-xs text-content-faint">
-                        {product.ingredients.length} itens
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {product.ingredients.slice(0, 4).map((ingredient) => (
-                        <span
-                          key={ingredient.id}
-                          className="rounded-lg bg-surface-muted px-2.5 py-1 text-xs text-content-secondary"
-                        >
-                          {ingredient.name}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </article>
-          </li>
-        ))} */}
+        {products.map((product, index) => (
+          <ProductItem product={product} key={index} />
+        ))}
       </ul>
     </section>
   );

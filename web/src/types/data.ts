@@ -19,8 +19,6 @@ export type Products = {
   production_cost: number;
   profit_percentage?: number;
   profit_amount?: number;
-  created_at: string;
-  last_updated: string;
 };
 
 export type Sales = {
