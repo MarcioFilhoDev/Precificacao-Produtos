@@ -1,38 +1,12 @@
 import { PlusIcon } from "@phosphor-icons/react";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
 import type { Products } from "../../../types/data";
-import { AuthContext } from "../../../contexts/AuthContext";
-import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "../../../services/firebaseConnection";
 import ProductItem from "../../../components/ProductItem";
+import { ProductContext } from "../../../contexts/ProductsContext";
 
 export default function Products() {
-  const { userInfo } = useContext(AuthContext);
-
-  const [products, setProducts] = useState<Products[] | []>([]);
-
-  useEffect(() => {
-    async function getAllProducts() {
-      const userId = userInfo?.id;
-
-      if (!userId) {
-        return;
-      }
-
-      const q = query(collection(db, "products", userId, "products"));
-
-      const snapshot = await getDocs(q);
-      setProducts(
-        snapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        })) as Products[],
-      );
-    }
-
-    getAllProducts();
-  }, [userInfo]);
+  const { products } = useContext(ProductContext);
 
   return (
     <section className="w-full max-w-6xl text-content">
