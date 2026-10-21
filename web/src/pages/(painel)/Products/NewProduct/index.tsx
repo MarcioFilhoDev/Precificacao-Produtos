@@ -3,13 +3,19 @@ import { Controller } from "react-hook-form";
 import Input from "../../../../components/Input";
 import Ingredient from "../../../../components/Ingredient";
 import { useNewProduct } from "../../../../hooks/useNewProduct";
+import type { Products } from "../../../../types/data";
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return <p className="mt-1 text-xs text-red-700">{message}</p>;
 }
 
-export default function NewProduct() {
+interface ProductFormProps {
+  productId?: string;
+  initialProduct?: Products;
+}
+
+export function ProductForm({ productId, initialProduct }: ProductFormProps) {
   const {
     control,
     errors,
@@ -28,7 +34,7 @@ export default function NewProduct() {
     unitProductCost,
     profitAmountPerUnit,
     salePricePerUnit,
-  } = useNewProduct();
+  } = useNewProduct({ productId, initialProduct });
   const currencyFormatter = new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
@@ -38,10 +44,12 @@ export default function NewProduct() {
     <section className="w-full max-w-2xl min-w-0 text-content">
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Novo produto
+          {productId ? "Editar produto" : "Novo produto"}
         </h1>
         <p className="mt-2 text-sm leading-6 text-content-muted sm:text-base">
-          Informe os dados do produto e os ingredientes usados na produção.
+          {productId
+            ? "Atualize os dados do produto e os ingredientes usados na produção."
+            : "Informe os dados do produto e os ingredientes usados na produção."}
         </p>
       </header>
 
@@ -322,9 +330,17 @@ export default function NewProduct() {
           disabled={isSubmitting}
           className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-950/20 transition hover:bg-brand-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700"
         >
-          Salvar
+          {isSubmitting
+            ? "Salvando..."
+            : productId
+              ? "Salvar alterações"
+              : "Salvar"}
         </button>
       </form>
     </section>
   );
+}
+
+export default function NewProduct() {
+  return <ProductForm />;
 }

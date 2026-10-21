@@ -5,6 +5,7 @@ import SignUp from "../pages/auth/SignUp";
 import Dashboard from "../pages/(painel)/Dashboard";
 import Products from "../pages/(painel)/Products";
 import NewProduct from "../pages/(painel)/Products/NewProduct";
+import EditProduct from "../pages/(painel)/Products/EditProduct";
 import Sales from "../pages/(painel)/Sales";
 import Private from "./Private";
 import NotFound from "../pages/NotFound";
@@ -39,6 +40,14 @@ const router = createBrowserRouter([
     element: (
       <Private>
         <NewProduct />
+      </Private>
+    ),
+  },
+  {
+    path: "/edit-product/:productId",
+    element: (
+      <Private>
+        <EditProduct />
       </Private>
     ),
   },

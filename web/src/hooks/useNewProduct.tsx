@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -7,6 +7,7 @@ import { db } from "../services/firebaseConnection";
 import { useContext } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import type { Products } from "../types/data";
 
 const unitSchema = z.enum(["kg", "g", "l", "ml", "un"]);
 const usageSchema = z.enum(["complete", "partial"]);
@@ -164,7 +165,71 @@ const defaultIngredient = (usage: IngredientUsage): IngredientFormValues => ({
   price: "",
 });
 
-const useNewProduct = () => {
+const isUnit = (
+  unit: string | undefined,
+): unit is IngredientFormValues["packageUnit"] =>
+  unit === "kg" || unit === "g" || unit === "l" || unit === "ml" || unit === "un";
+
+function getProductFormValues(product: Products): ProductFormValues {
+  const ingredients = product.list_of_ingredients.map((ingredient) => {
+    const packageUnit = isUnit(ingredient.purchase_unity)
+      ? ingredient.purchase_unity
+      : isUnit(ingredient.used_unity)
+        ? ingredient.used_unity
+        : "kg";
+    const usedUnit = isUnit(ingredient.used_unity)
+      ? ingredient.used_unity
+      : packageUnit;
+    const packageQuantity =
+      ingredient.purchase_quantity ?? ingredient.used_quantity;
+    const isComplete =
+      packageQuantity === ingredient.used_quantity &&
+      packageUnit === usedUnit;
+
+    return {
+      usage: isComplete ? "complete" : "partial",
+      name: ingredient.ingredient_name ?? "",
+      brand: ingredient.brand ?? "",
+      packageQuantity: String(packageQuantity ?? ""),
+      packageUnit,
+      usedQuantity: isComplete ? "" : String(ingredient.used_quantity ?? ""),
+      usedUnit,
+      price: String(ingredient.purchase_price ?? ""),
+    } satisfies IngredientFormValues;
+  });
+  const profitPercentage =
+    product.profit_percentage ??
+    (product.product_cost > 0
+      ? ((product.sale_price * product.production_quantity -
+          product.production_cost) /
+          product.production_cost) *
+        100
+      : 30);
+  const includeWorkHours =
+    (product.labor_hours ?? 0) > 0 || (product.hourly_rate ?? 0) > 0;
+
+  return {
+    name: product.name,
+    productionQuantity: String(product.production_quantity),
+    profitPercentage: String(
+      Number.isFinite(profitPercentage) ? profitPercentage : 30,
+    ),
+    includeWorkHours,
+    workHours: includeWorkHours ? String(product.labor_hours ?? "") : "",
+    hourlyRate: includeWorkHours ? String(product.hourly_rate ?? "") : "",
+    ingredients,
+  };
+}
+
+interface UseNewProductOptions {
+  productId?: string;
+  initialProduct?: Products;
+}
+
+const useNewProduct = ({
+  productId,
+  initialProduct,
+}: UseNewProductOptions = {}) => {
   const {
     control,
     handleSubmit,
@@ -173,15 +238,17 @@ const useNewProduct = () => {
     formState: { errors, isSubmitting },
   } = useForm<ProductFormValues>({
     resolver: zodResolver(ProductSchema),
-    defaultValues: {
-      name: "",
-      productionQuantity: "",
-      profitPercentage: "30",
-      includeWorkHours: false,
-      workHours: "",
-      hourlyRate: "",
-      ingredients: [],
-    },
+    defaultValues: initialProduct
+      ? getProductFormValues(initialProduct)
+      : {
+          name: "",
+          productionQuantity: "",
+          profitPercentage: "30",
+          includeWorkHours: false,
+          workHours: "",
+          hourlyRate: "",
+          ingredients: [],
+        },
   });
 
   const ingredients = useFieldArray({
@@ -327,13 +394,25 @@ const useNewProduct = () => {
     };
 
     try {
-      const productsRef = collection(db, "products", userId, "products");
-      await addDoc(productsRef, databasePayload);
-      toast.success("Produto salvo com sucesso!");
+      if (productId) {
+        await updateDoc(
+          doc(db, "products", userId, "products", productId),
+          databasePayload,
+        );
+        toast.success("Produto atualizado com sucesso!");
+      } else {
+        const productsRef = collection(db, "products", userId, "products");
+        await addDoc(productsRef, databasePayload);
+        toast.success("Produto salvo com sucesso!");
+      }
       navigate("/products");
     } catch (error) {
-      toast.error("Erro ao registrar novo produto");
-      console.log(error);
+      toast.error(
+        productId
+          ? "Erro ao atualizar o produto"
+          : "Erro ao registrar novo produto",
+      );
+      console.error(error);
       throw error;
     }
   }

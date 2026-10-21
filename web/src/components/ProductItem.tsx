@@ -1,12 +1,15 @@
 import { PackageIcon } from "@phosphor-icons/react";
 import type { Products } from "../types/data";
 import { DotsThreeVerticalIcon } from "@phosphor-icons/react/dist/icons/DotsThreeVertical";
+import { useNavigate } from "react-router-dom";
 
 interface ProductItemProps {
   product: Products;
 }
 
 export default function ProductItem({ product }: ProductItemProps) {
+  const navigate = useNavigate();
+
   return (
     <li className="h-full">
       <article className="h-full rounded-lg border border-line bg-surface p-5 transition hover:border-line-hover hover:shadow-md">
@@ -16,7 +19,15 @@ export default function ProductItem({ product }: ProductItemProps) {
             {product.name}
           </h2>
 
-          <button title="Editar">
+          <button
+            type="button"
+            title="Editar produto"
+            aria-label={`Editar ${product.name}`}
+            onClick={() => {
+              if (product.id) navigate(`/edit-product/${product.id}`);
+            }}
+            className="rounded-lg p-1 text-content-muted transition hover:bg-surface-muted hover:text-content-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700"
+          >
             <DotsThreeVerticalIcon size={20} weight="duotone" />
           </button>
         </div>
